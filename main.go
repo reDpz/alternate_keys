@@ -1,19 +1,27 @@
+// comment jajaja
 package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/eiannone/keyboard"
 )
 
 var (
-	keys      [2]rune
-	debugMode = true
+	keys        [2]rune
+	previousKey rune
+	debugMode   = true
+	tolarance   int
+	tolarated   int
 )
 
 func main() {
+	tolarance = 2
+	tolarated = tolarance
 	getKeys()
 	debugPrint(fmt.Sprintf("Keys: %v %v", string(keys[0]), string(keys[1])))
+	debugPrint(fmt.Sprintf("Tolarance is %v and tolarated is %v", tolarance, tolarated))
 
 	// get keyboard inputs
 	err := keyboard.Open()
@@ -23,12 +31,37 @@ func main() {
 	// prompt to tell user what to do
 	fmt.Println("Please begin alternating, press <Esc> to quit at any time")
 
+	// var previousKey rune
+
+	// this is where we actually keep track of key presses
 	for {
+		debugPrint(fmt.Sprintf("Previous key is %v", previousKey))
+
 		char, key, err := keyboard.GetSingleKey()
 		panicErr(err)
 
 		// print the current key
 		debugPrint(fmt.Sprintf("You pressed: %v, %v", string(char), key))
+
+		// check if key is in the keys arrray
+		if char != keys[0] && char != keys[1] {
+			fmt.Println("Please only press the defined keys.")
+		} else {
+			// check if currently pressed key is the same as the previously pressed key
+			if previousKey != 0 && previousKey == char {
+				tolarated--
+				if tolarated < tolarance {
+					fmt.Println("Maximum tolaration reached.")
+				}
+			} else {
+				tolarated = tolarance
+			}
+
+			// used to compare and make sure that the next key is not the same as previous
+			previousKey = char
+		}
+
+		debugPrint(fmt.Sprintf("Tolarance is %v and tolarated is %v", tolarance, tolarated))
 
 		if key == keyboard.KeyEsc {
 			debugPrint("Quitting...")
@@ -76,5 +109,18 @@ func panicErr(err error) {
 	}
 }
 
-func isKey(pressed string) {
+func setToleration() {
+	var input string
+	for {
+		fmt.Println("Enter tolerance value (how many repeated keystrokes are allowed)")
+		fmt.Scanln(&input)
+
+		// convert input into an integer
+		intInput, err := strconv.Atoi(input)
+		if err != nil {
+			fmt.Println("Please enter a valid integer")
+		} else {
+			tolarance = intInput
+		}
+	}
 }
