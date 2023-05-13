@@ -1,9 +1,17 @@
 // comment jajaja
 package main
 
+/*
+TODO
+- Make it run in the background
+- Allow for flags so debug mode is disabled by default however if "-verbose" is used it will be enabled - Done!
+*/
+
 import (
 	"fmt"
+	"os"
 	"strconv"
+	// "strings"
 
 	"github.com/eiannone/keyboard"
 	"github.com/fatih/color"
@@ -12,22 +20,34 @@ import (
 var (
 	keys        [2]rune
 	previousKey rune
-	debugMode   = true
-	tolarance   int
-	tolarated   int
+	debugMode   bool
+	flags       = make([]string, 0, 10)
+
+	// toleration
+	tolarance int
+	tolarated int
+
+	// counter
+	streak int
 
 	// colors
-	exceedColor = color.New(color.FgBlack).Add(color.BgRed)
-	debugColor  = color.New(color.FgBlack).Add(color.BgGreen)
-	noBgColor   = color.New(color.FgWhite)
+	negativeColor = color.New(color.FgHiRed)
+	positiveColor = color.New(color.FgHiGreen)
+	exceedColor   = color.New(color.FgBlack).Add(color.BgHiRed)
+	warningColor  = color.New(color.FgBlack).Add(color.BgYellow)
+	debugColor    = color.New(color.FgBlack).Add(color.BgGreen)
+	noBgColor     = color.New(color.FgWhite)
 )
 
 func main() {
+	getFlags()
+
 	// color for when user gets out of tolaranced threshold
 
 	setToleration()
 
-	tolarated = tolarance
+	// tolerated is automatically set to 0 in go
+
 	getKeys()
 	debugPrint(fmt.Sprintf("Keys: %v %v", string(keys[0]), string(keys[1])))
 	debugPrint(fmt.Sprintf("Tolarance is %v and tolarated is %v", tolarance, tolarated))
@@ -54,18 +74,30 @@ func main() {
 
 		// check if key is in the keys arrray
 		if char != keys[0] && char != keys[1] {
-			fmt.Println("Please only press the defined keys.")
+			warningColor.Print("Please only press the defined keys.")
+			fmt.Printf("\n")
+			streak = 0
+			fmt.Println("Streak has been reset")
 		} else {
 			// check if currently pressed key is the same as the previously pressed key
 			if previousKey != 0 && previousKey == char {
-				tolarated--
-				if tolarated < tolarance {
-					exceedColor.Println("Maximum tolaration reached.")
-					noBgColor.Print("")
+				tolarated++
+				if tolarated > tolarance {
+					streak = 0
+					exceedColor.Print("Maximum tolaration reached, streak has been reset.")
+					// new line needs to printed like so to avoid the background not being reset
+					fmt.Printf("\n")
+
+				} else {
+					streak++
 				}
 			} else {
-				tolarated = tolarance
+				tolarated = 0
+				streak++
+
 			}
+
+			printStreak()
 
 			// used to compare and make sure that the next key is not the same as previous
 			previousKey = char
@@ -133,6 +165,46 @@ func setToleration() {
 		} else {
 			tolarance = intInput
 			break
+		}
+	}
+}
+
+func printStreak() {
+	fmt.Print("Streak: ")
+
+	if streak > 0 {
+		positiveColor.Print(streak)
+	} else {
+		negativeColor.Print(streak)
+	}
+	fmt.Print("\n")
+}
+
+func getFlags() {
+	// This function will check whether -v or --verbose flag has been passed through and if so turn on debug mode
+
+	arguments := os.Args
+
+	for index, value := range arguments {
+		fmt.Println(index, value)
+		intString := string(value[0])
+
+		// fmt.Println("This is the first character:", intString)
+		if intString == "-" {
+			// fmt.Println("This string has a - infront of it:", value)
+			flags = append(flags, value)
+		}
+	}
+
+	setDebug()
+
+	debugPrint(fmt.Sprintf("Length of args: %v\nArguments: %v\n", len(os.Args), arguments))
+}
+
+func setDebug() {
+	for _, value := range flags {
+		if value == "-v" || value == "--verbose" {
+			debugMode = true
 		}
 	}
 }
