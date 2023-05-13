@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/eiannone/keyboard"
+	"github.com/fatih/color"
 )
 
 var (
@@ -14,10 +15,18 @@ var (
 	debugMode   = true
 	tolarance   int
 	tolarated   int
+
+	// colors
+	exceedColor = color.New(color.FgBlack).Add(color.BgRed)
+	debugColor  = color.New(color.FgBlack).Add(color.BgGreen)
+	noBgColor   = color.New(color.FgWhite)
 )
 
 func main() {
-	tolarance = 2
+	// color for when user gets out of tolaranced threshold
+
+	setToleration()
+
 	tolarated = tolarance
 	getKeys()
 	debugPrint(fmt.Sprintf("Keys: %v %v", string(keys[0]), string(keys[1])))
@@ -51,7 +60,8 @@ func main() {
 			if previousKey != 0 && previousKey == char {
 				tolarated--
 				if tolarated < tolarance {
-					fmt.Println("Maximum tolaration reached.")
+					exceedColor.Println("Maximum tolaration reached.")
+					noBgColor.Print("")
 				}
 			} else {
 				tolarated = tolarance
@@ -99,7 +109,8 @@ func getKeys() {
 
 func debugPrint(printStatement string) {
 	if debugMode {
-		fmt.Println("[DEBUG]", printStatement)
+		debugColor.Print("[DEBUG]")
+		fmt.Println("", printStatement)
 	}
 }
 
@@ -121,6 +132,7 @@ func setToleration() {
 			fmt.Println("Please enter a valid integer")
 		} else {
 			tolarance = intInput
+			break
 		}
 	}
 }
