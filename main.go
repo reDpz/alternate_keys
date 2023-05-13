@@ -4,7 +4,6 @@ package main
 /*
 TODO
 - Make it run in the background
-- Allow for flags so debug mode is disabled by default however if "-verbose" is used it will be enabled - Done!
 */
 
 import (
@@ -31,6 +30,7 @@ var (
 	streak int
 
 	// colors
+	colors        = [...]*color.Color{color.New(color.FgHiBlue), color.New(color.FgHiMagenta)}
 	negativeColor = color.New(color.FgHiRed)
 	positiveColor = color.New(color.FgHiGreen)
 	exceedColor   = color.New(color.FgBlack).Add(color.BgHiRed)
@@ -78,6 +78,7 @@ func main() {
 			fmt.Printf("\n")
 			streak = 0
 			fmt.Println("Streak has been reset")
+			tolarated = 0
 		} else {
 			// check if currently pressed key is the same as the previously pressed key
 			if previousKey != 0 && previousKey == char {
@@ -119,6 +120,7 @@ func getKeys() {
 		for i := 0; i < 2; i++ {
 			for {
 				fmt.Printf("Enter key for key %v\n", i+1)
+				colors[i].Print("❯ ")
 				fmt.Scanln(&input)
 
 				// make sure that user only entered 1 key
@@ -155,7 +157,8 @@ func panicErr(err error) {
 func setToleration() {
 	var input string
 	for {
-		fmt.Println("Enter tolerance value (how many repeated keystrokes are allowed)")
+		fmt.Print("Enter tolarance value (how many repeated keystrokes are allowed)\n")
+		positiveColor.Print("❯ ")
 		fmt.Scanln(&input)
 
 		// convert input into an integer
@@ -185,8 +188,8 @@ func getFlags() {
 
 	arguments := os.Args
 
-	for index, value := range arguments {
-		fmt.Println(index, value)
+	for _, value := range arguments {
+		// fmt.Println(index, value)
 		intString := string(value[0])
 
 		// fmt.Println("This is the first character:", intString)
