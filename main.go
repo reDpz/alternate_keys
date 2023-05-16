@@ -74,8 +74,14 @@ func main() {
 
 		// check if key is in the keys arrray
 
-		// in this commit the Escape key won't be triggered as a "Undefined key"
-		if char != keys[0] && char != keys[1] && key != keyboard.KeyEsc {
+		// in this commit the Escape key won't be triggered as an "undefined key" by checking if the key being pressed is the escape key or not first. This also prevents unintentional streak increases.
+
+		if key == keyboard.KeyEsc {
+			debugPrint("Quitting...")
+			break
+		}
+
+		if char != keys[0] && char != keys[1] {
 			warningColor.Print("Please only press the defined keys.")
 			fmt.Printf("\n")
 			streak = 0
@@ -108,10 +114,6 @@ func main() {
 
 		debugPrint(fmt.Sprintf("Tolarance is %v and tolarated is %v", tolarance, tolarated))
 
-		if key == keyboard.KeyEsc {
-			debugPrint("Quitting...")
-			break
-		}
 	}
 }
 
