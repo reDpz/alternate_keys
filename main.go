@@ -73,7 +73,9 @@ func main() {
 		debugPrint(fmt.Sprintf("You pressed: %v, %v", string(char), key))
 
 		// check if key is in the keys arrray
-		if char != keys[0] && char != keys[1] {
+
+		// in this commit the Escape key won't be triggered as a "Undefined key"
+		if char != keys[0] && char != keys[1] && key != keyboard.KeyEsc {
 			warningColor.Print("Please only press the defined keys.")
 			fmt.Printf("\n")
 			streak = 0
