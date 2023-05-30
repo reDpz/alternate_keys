@@ -2,8 +2,8 @@
 package main
 
 /*
-TODO
-- Make it run in the background
+TODO:
+[ ] Make it run in the background
 */
 
 import (
